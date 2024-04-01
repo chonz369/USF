@@ -25,6 +25,8 @@ public class AudioSystem : MonoBehaviour, GameSystem
 
     private AssetLoader<AudioClip> audioLoader;
 
+    private string currentBgmName;
+
     public float MasterVolume {
         get {
             return masterVolume;
@@ -95,9 +97,14 @@ public class AudioSystem : MonoBehaviour, GameSystem
     }
 
     private void LoadSavedSettings() {
-        BgmVolume = PlayerPrefs.GetFloat("BgmVolume", 1);
-        SeVolume = PlayerPrefs.GetFloat("SeVolume", 1);
-        AmbienceVolume = PlayerPrefs.GetFloat("AmbienceVolume", 1);
+        if (bgmVolume != null)
+            BgmVolume = PlayerPrefs.GetFloat("BgmVolume", 1);
+
+        if (seVolume != null)
+            SeVolume = PlayerPrefs.GetFloat("SeVolume", 1);
+
+        if (ambienceVolume != null)
+            AmbienceVolume = PlayerPrefs.GetFloat("AmbienceVolume", 1);
     }
 
     public async UniTask PlayAmbienceAsync(string ambienceName, float? fadeDuration = null) {
@@ -120,6 +127,8 @@ public class AudioSystem : MonoBehaviour, GameSystem
     }
 
     public async UniTask PlayBgmAsync(string bgmName, float? fadeDuration = null) {
+        if (bgmName == currentBgmName) return;
+
         if (fadeDuration == null) {
             fadeDuration = audioConfiguration.DefaultFadeDuration;
         }
@@ -153,6 +162,9 @@ public class AudioSystem : MonoBehaviour, GameSystem
     }
 
     public void PlayBgm(AudioClip clip, float fadeDuration) {
+        if (currentBgmName == clip.name) return;
+        currentBgmName = clip.name;
+
         bgmAudioSource.DOKill();
         bgmAudioSource.clip = clip;
         bgmAudioSource.loop = true;

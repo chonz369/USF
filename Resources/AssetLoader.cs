@@ -41,6 +41,9 @@ public class AssetLoader<T> where T : Object
 
     public async UniTask<T> LoadAndHoldAsync(string filePath, Object holder, CancellationToken token = default) {
         if (assetDictionary.ContainsKey(filePath)) {
+            if (holder != null)
+                assetDictionary[filePath].AddHolder(holder);
+
             return assetDictionary[filePath].Asset;
         }
 
@@ -75,9 +78,32 @@ public class AssetLoader<T> where T : Object
         }
     }
 
+    public void UnloadAsset(T asset, Object holder = null) {
+        string k = null;
+        foreach (var key in assetDictionary.Keys) {
+            if (assetDictionary[key].Asset == asset) {
+                k = key;
+                if (holder != null)
+                    assetDictionary[k].RemoveHolder(holder);
+
+                break;
+            }
+        }
+
+        if (k == null) {
+            Debug.LogError($"UnloadAsset is called on unexisted asset{asset.name}");
+            return;
+        }
+
+        if (assetDictionary[k].Holders.Count == 0) {
+            Addressables.Release(assetDictionary[k].Handle);
+            assetDictionary.Remove(k);
+        }
+    }
+
     public void UnloadAsset(string filePath, Object holder = null) {
         if (!assetDictionary.ContainsKey(filePath)) {
-            Debug.LogError($"UnloadAsset is called on unexisted asset{filePath}");
+            Debug.LogError($"UnloadAsset is called on unexisted asset : {filePath}");
             return;
         }
 

@@ -55,8 +55,8 @@ namespace USF.Core
             await spawningSystems.ToList().ForEachAsync(
                 async x => {
                     var system = Instantiate(x, transform).GetComponent<GameSystem>();
-                    await system.Init(this);
                     gameSystemList.Add(system);
+                    await system.Init(this);
                 });
 
             onSystemInitializingEnd.Invoke();
